@@ -1,0 +1,15 @@
+.git
+.gitignore
+.idea
+.vscode
+target
+*.log
+*.pid
+.env
+.env.local
+Dockerfile*
+docker-compose*.yml
+README.md
+HELP.md
+postman
+.postman

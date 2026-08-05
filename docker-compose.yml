@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: estoque
+      POSTGRES_USER: estoque_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-estoque123} # deixei valores padrões aqui pra facilitar nos testes mas sei que em produção isso n vai acontecer
+    volumes:
+      - estoque_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U estoque_app -d estoque"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5433:5432"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/estoque
+      DB_USERNAME: estoque_app
+      DB_PASSWORD: ${DB_PASSWORD:-estoque123}
+      JWT_SECRET: ${JWT_SECRET:-estoque-api-chave-jwt-local-dev-2026-segura} # deixei valores padrões aqui pra facilitar nos testes mas sei que em produção isso n vai acontecer
+      APP_SEED_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+volumes:
+  estoque_postgres_data:
